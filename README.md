@@ -1,4 +1,5 @@
-# Memorial da Vovó Vilma – Guia de Instalação e Hospedagem
+- # Memorial da Vovó Vilma – Guia de Instalação e Hospedagem
++ # Memorial da Vovó Vilma – Guia de Instalação e Deploy
 
 Este projeto é um site interativo memorial da Vilma de Jesus Tonaco, com galeria de fotos, áudios e um chat com inteligência artificial que simula sua personalidade e voz.
 
