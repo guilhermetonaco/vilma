@@ -1,0 +1,161 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Converse com a Vovó Vilma</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Roboto&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background-color: #fffdf7;
+      color: #3d3d3d;
+    }
+    header {
+      background-color: #9c786c;
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem;
+      margin: 0;
+    }
+    main {
+      max-width: 800px;
+      margin: auto;
+      padding: 2rem;
+    }
+    #chat {
+      background-color: #f4e9e4;
+      padding: 1rem;
+      border-radius: 10px;
+      height: 400px;
+      overflow-y: auto;
+      margin-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .mensagem {
+      margin: 0.5rem 0;
+      padding: 0.8rem;
+      border-radius: 8px;
+      max-width: 80%;
+      word-wrap: break-word;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    .user {
+      background-color: #d3e5ff;
+      align-self: flex-end;
+      margin-left: auto;
+    }
+    .vilma {
+      background-color: #ffe4e1;
+      align-self: flex-start;
+      position: relative;
+    }
+    .vilma::before {
+      content: '\1F475';
+      position: absolute;
+      left: -2rem;
+      top: 0.2rem;
+      font-size: 1.5rem;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    #entrada {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      resize: vertical;
+    }
+    #enviar, #limpar {
+      margin-top: 0.5rem;
+      background-color: #5a3e36;
+      color: white;
+      border: none;
+      padding: 0.8rem 2rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-right: 0.5rem;
+    }
+    #enviar:hover, #limpar:hover {
+      background-color: #4a322d;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Converse com a Vovó Vilma</h1>
+  </header>
+  <main>
+    <section id="chat" aria-label="Histórico de mensagens"></section>
+    <textarea id="entrada" placeholder="Escreva sua mensagem para a Vovó..." aria-label="Mensagem" rows="3"></textarea><br>
+    <button id="enviar" aria-label="Enviar mensagem">Enviar</button>
+    <button id="limpar" aria-label="Limpar conversa">Limpar</button>
+  </main>
+  <script>
+    const chatDiv = document.getElementById("chat");
+    const entrada = document.getElementById("entrada");
+    const enviar = document.getElementById("enviar");
+    const limpar = document.getElementById("limpar");
+    let mensagens = [];
+    let fuse;
+
+    function adicionarMensagem(texto, classe) {
+      const div = document.createElement("div");
+      div.className = "mensagem " + classe;
+      div.textContent = texto;
+      chatDiv.appendChild(div);
+      chatDiv.scrollTop = chatDiv.scrollHeight;
+    }
+
+    function responderPorBusca(textoUsuario) {
+      const resultado = fuse.search(textoUsuario);
+      const resposta = resultado.length > 0 ? resultado[0].item.resposta : "A vovó não entendeu bem, mas manda um abraço cheio de amor.";
+      adicionarMensagem(resposta, "vilma");
+    }
+
+    enviar.addEventListener("click", () => {
+      const texto = entrada.value.trim();
+      if (!texto) return;
+      adicionarMensagem(texto, "user");
+      responderPorBusca(texto);
+      entrada.value = "";
+    });
+
+    entrada.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        enviar.click();
+      }
+    });
+
+    limpar.addEventListener("click", () => {
+      chatDiv.innerHTML = "";
+    });
+
+    fetch('/dados/respostas_vovo_vilma_indexado.json')
+      .then(resp => resp.json())
+      .then(data => {
+        mensagens = data;
+        fuse = new Fuse(mensagens, {
+          keys: ['resposta', 'tags'],
+          includeScore: true,
+          threshold: 0.4
+        });
+      });
+  </script>
+</body>
+</html>
